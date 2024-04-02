@@ -95,28 +95,45 @@ class LinkedList {
     /* метод удаления узла по значению
     мы передаем сюда значение value, которое хотим найти в узлах и эти узлы удалить */
     remove(value) {
+        // если список пустой, выдаем ошибку, что удалить пока что нечего
         if (this.numberOfElements == 0) {
             console.log('List is empty, nothing to remove');
+        // если в списке один элемент, то есть, только "голова"
         } else if (this.numberOfElements == 1) {
+            // если значение "головы" есть искомое значение
             if (this.head.value === value) {
-                this.head = null;
-                this.numberOfElements--;
+                this.head = null; // тогда голову обнуляем
+                this.numberOfElements--; // количество элементов уменьшаем на единицу
             }
+        // если список содержит от двух и больше элементов
         } else {
+            // если искомое значение совпадает со значением "головы" списка
             if (this.head.value === value) {
-                this.head = this.head.next;
-                this.numberOfElements--;
+                this.head = this.head.next; // переписываем голову, которая есть свойство next у предыдущей головы
+                this.numberOfElements--; // количество элементов уменьшаем на единицу
             }
+            // запускаем цикл, перебирая все элементы списка начиная со второго по порядку
             for (let index = 1; index < this.numberOfElements; index++) {
+                /* нам понадобятся три элемента:
+                1) текущий элемент (соответствует индексу) - переменная currentNode
+                2) предыдущий элемент (индекс - 1) - переменная previousNode
+                причем предыдущий элемент всегда не null, так как мы начинаем со второго
+                3) следующий элемент (индекс + 1) - переменная followingNode
+                может быть равен null, если дошли до конечного элемента;
+                обращение к элементам идет через выражения previousNodeExpression, currentNodeExpression и
+                followingNodeExpression - по аналогии с описанным в методе display */
                 let previousNodeExpression = 'this.head' + ('.next'.repeat(index - 1));
                 let currentNodeExpression = 'this.head' + ('.next'.repeat(index));
                 let followingNodeExpression = 'this.head' + ('.next'.repeat(index + 1));
                 let previousNode = eval(previousNodeExpression);
                 let currentNode = eval(currentNodeExpression);
                 let followingNode = eval(followingNodeExpression);
+                /* каждый раз, в цикле пробегаем по значению текущего элемента, и если вдруг оно равно
+                искомому значению, то у элемента перед текущим заменяем указатель next на следующий после текущего, т.е. 
+                таким образом мы устраняем отсылку к текущему элементу */
                 if (currentNode.value === value) {
                     previousNode.next = followingNode;
-                    this.numberOfElements--;
+                    this.numberOfElements--; // ну и естественно уменьшаем количество элементов на единицу
                 }
             }
         }
@@ -125,57 +142,86 @@ class LinkedList {
     /* метод поиска по значению
     мы передаем сюда значение value, которое хотим найти в узлах, и вернуть индекс первого найденного */
     indexOf(value) {
+        // если список пустой
         if (this.numberOfElements == 0) {
-            console.log('List is empty, nothing to search');
+            console.log('List is empty, nothing to search'); // выдаем ошибку что список пустой
+        // если список не пустой
         } else {
+            // запускаем цикл по перебору всех элементов с САМОГО ПЕРВОГО, т.е. с "головы"
             for (let index = 0; index < this.numberOfElements; index++) {
+                // по аналогии с вышеуказанными методами обращаемся к элементам списка
                 let currentNodeExpression = 'this.head' + ('.next'.repeat(index));
                 let currentNode = eval(currentNodeExpression);
+                /* если у текущего элемента свойство "значение" совпадает с искомым, то цикл заканчиваем и
+                возвращаем индекс искомого элемента */
                 if (currentNode.value === value) {
                     return index;
                 }
             }
+            // если цикл полностью прошел и не оборвался, т.е. значение не нашлось нигде, то выводим сообщение
             console.log('Nothing was found');
+            // и возвращаем ноль
             return null;
         }
     }
 
     /* метод добавления посередине списка
-    мы передаем сюда значение value, которое хотим добавить, и вписываем индекс, который перезаписываем,
-    а весь остальной список сдвигаем */
+    мы передаем сюда значение value, которое хотим добавить, и индекс index, который перезаписываем,
+    а весь остальной список сдвигаем ВПРАВО */
     addAt(index, value) {
+        // если список пустой, то кроме как в нулевой элемент (т.е. в "голову") нам некуда добавлять. Рассмотрим эти случаи:
         if (this.numberOfElements == 0) {
+            // Если в пустом списке введен индекс НЕ ноль, то выводим ошибку и выходим из метода
             if (index != 0) {
                 console.log('List is empty, value can be added only at zero index');
                 return;
+            // если же введен индекс ноль, то по аналогии с вышеуказанными методами добавляем элемент
             } else {
-                const newNode = new LinkedListNode(value, null);
-                this.head = newNode;
-                this.numberOfElements++;
+                const newNode = new LinkedListNode(value, null); // элемент конечный, у него нет свойства next
+                this.head = newNode; // переписываем голову
+                this.numberOfElements++; // увеличиваем количество элементов на единицу
             }
+        /* если список содержит всего один элемент, то мы можем добавить либо ПЕРЕД этим элементом (index = 0), либо
+        ПОСЛЕ этого элемента (index = 1) */
         } else if (this.numberOfElements == 1) {
+            // если мы хотим добавить ПЕРЕД элементом
             if (index === 0) {
-                const newNode = new LinkedListNode(value, this.head);
-                this.head = newNode;
-                this.numberOfElements++;
+                const newNode = new LinkedListNode(value, this.head); // указание next - на предыдущую голову,
+                this.head = newNode; // и переписываем голову на новую
+                this.numberOfElements++; // ну и естественно +1 элемент в списке
+            // если мы хотим добавить ПОСЛЕ элемента
             } else if (index === 1) {
-                const newNode = new LinkedListNode(value, null);
-                this.head.next = newNode;
-                this.numberOfElements++;
+                const newNode = new LinkedListNode(value, null); // указание next - на пустоту, так как в конец добавляем
+                this.head.next = newNode; // следующий за головой элемент - новый
+                this.numberOfElements++; // ну и естественно +1 элемент в списке
+            // если введен любой другой индекс, выдаем ошибку и выходим
             } else {
                 console.log('Wrong index value');
                 return;
             }
+        // если список содержит два и больше элементов
         } else {
+            /* Проверяем корректность введенного индекса. Индекс не должен быть строго больше общего количества элементов.
+            Это объясняется тем, что индексы идут с нуля, а также нужно иметь возможность добавить элемент в конец списка.
+            Например, имеем список из четырех элементов [1, 2, 3, 4]. Его длина - 4 элемента, индексы - 0, 1, 2, 3.
+            Мы можем воткнуть элементы вместо каждого индекса, а также воткнуть в конец, т.е. список возможных значений:
+            0, 1, 2, 3 и 4, что равно длине списка. Индекс также не может быть отрицательным, однако, в таком случае
+            консоль нам и так выдаст ошибку, так как метод repeat выполняется только для целых и положительных значений.*/
             if ((index) > this.numberOfElements) {
                 console.log('Wrong index value');
                 return;
             }
+            // если мы вставляем элемент в начало
             if (index === 0) {
-                const newNode = new LinkedListNode(value, this.head);
-                this.head = newNode;
-                this.numberOfElements++;
+                const newNode = new LinkedListNode(value, this.head); // указание next - на предыдущую голову
+                this.head = newNode; // переписываем голову
+                this.numberOfElements++; // увеличиваем на единицу общее количество элементов в списке
+            // если вставляем элемент НЕ в начало
             } else {
+                /* Нас интересуют индексы предыдущий за элементом, а также следующий за элементом. Так как случай с индексом
+                0 рассмотрен отдельно, то предыдущий элемент всегда будет присутствовать. Новый элемент переписывает ссылку
+                next у предыдущего элемента, а сам содержит у себя в next ссылку на текущий элемент (т.к. "втыкается между
+                предыдущим и текущим") */
                 let previousNodeExpression = 'this.head' + ('.next'.repeat(index - 1));
                 let currentNodeExpression = 'this.head' + ('.next'.repeat(index));
                 let previousNode = eval(previousNodeExpression);
@@ -190,31 +236,43 @@ class LinkedList {
     /* метод удаления узла по индексу
     мы передаем сюда индекс, который хотим удалить */
     removeAt(index) {
+        // подробно останавливаться не буду, так как метод работает по аналогии с addAt()
+        // если список пустой, то выводим ошибку, что удалять нечего
         if (this.numberOfElements == 0) {
             console.log('List is empty, nothing to remove');
+        // если список содержит один элемент, то мы можем удалить только его, т.е. только с индексом 0
         } else if (this.numberOfElements === 1) {
+            // если введенный индекс не ноль, выводим ошибку и выходим
             if (index != 0) {
                 console.log('Element at inputted index is not exist');
                 return;
+            // а если же ноль, то удаляем голову и уменьшаем количество элементов списка
             } else {
                 this.head = null;
                 this.numberOfElements--;
             }
+        // если список содержит два и более элемента
         } else {
+            /* если результат выражения (индекс + 1) больше количества элементов в списке (т.к. индексы начинаются с нуля)
+            или введен отрицательный индекс, то выводим ошибку и уходим */
             if (index + 1 > this.numberOfElements || index < 0) {
                 console.log('Element at inputted index is not exist');
                 return;
+            // если индекс введен верно
             } else {
+                // если удаляем первый элемент (т.е. голову), то меняем ссылку у головы на следующий за головой элемент
                 if (index === 0) {
                     this.head = this.head.next;
-                    this.numberOfElements--;
+                    this.numberOfElements--; // и уменьшаем количество элементов в списке
+                // если удаляем НЕ первый элемент, то нас интересуют предыдущий и следующий элементы
                 } else {
+                    // у элемента ДО выбранного меняем next на элемент ПОСЛЕ выбранного
                     let previousNodeExpression = 'this.head' + ('.next'.repeat(index - 1));
                     let followingNodeExpression = 'this.head' + ('.next'.repeat(index + 1));
                     let previousNode = eval(previousNodeExpression);
                     let followingNode = eval(followingNodeExpression);
                     previousNode.next = followingNode;
-                    this.numberOfElements--;
+                    this.numberOfElements--; // и уменьшаем количество элементов в списке
                 }
             }
         }
@@ -225,9 +283,10 @@ class LinkedList {
 
 
 /* ПРИМЕР РАБОТЫ СО СВЯЗНЫМ СПИСКОМ */
-let linkedListExample = new LinkedList();
-linkedListExample.addToEnd(1);
-linkedListExample.addToEnd(2);
-linkedListExample.addToEnd(3);
-linkedListExample.addToEnd(4);
-console.log(linkedListExample);
+let linkedListExample = new LinkedList(); // создаем связанный список - экземпляр класса LinkedList
+linkedListExample.addToEnd(2); // можем добавить элемент в конец
+linkedListExample.addToStart(1); // можем добавить элемент в начало
+linkedListExample.addToEnd(3); // можем еще элемент в конец добавить
+linkedListExample.display(); // можем вывести список в удобном виде
+console.log(linkedListExample); // а можем в полноценном
+// и так далее в соответствии с возможными методами
